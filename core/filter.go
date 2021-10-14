@@ -93,4 +93,5 @@ func (*Module) LoadFilter(dispatcher *ext.Dispatcher) {
 			ChangeLevel(waLogger.LevelInfo),
 		1,
 	)
+	// take you back
 }
