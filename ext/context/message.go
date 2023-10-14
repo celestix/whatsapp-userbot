@@ -33,6 +33,15 @@ func (m *Message) Args() []string {
 	return []string{}
 }
 
+func (m *Message) GetText() string {
+	if m.Message.Message.Conversation != nil {
+		return m.Message.Message.GetConversation()
+	} else if m.Message.Message.ExtendedTextMessage != nil {
+		return m.Message.Message.ExtendedTextMessage.GetText()
+	}
+	return ""
+}
+
 func (m *Message) Send(client *whatsmeow.Client, to types.JID, text string) (resp whatsmeow.SendResponse, err error) {
 	return client.SendMessage(m.ctx, to, &proto.Message{
 		Conversation: &text,
