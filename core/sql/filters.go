@@ -20,13 +20,9 @@ func DeleteFilter(name string) bool {
 }
 
 func GetFilter(name string) *Filter {
-	w := &Filter{Name: name}
-	if SESSION.First(w).RowsAffected == 0 {
-		return &Filter{
-			Name: name,
-		}
-	}
-	return w
+	w := Filter{Name: name}
+	SESSION.First(&w)
+	return &w
 }
 
 func GetFilters() []Filter {

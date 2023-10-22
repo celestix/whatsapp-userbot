@@ -15,10 +15,6 @@ var LOGGER = logger.NewLogger(logger.LevelInfo)
 
 type Module struct{}
 
-func stringPtr(s string) *string {
-	return &s
-}
-
 func authorizedOnly(callback handlers.Response) handlers.Response {
 	return func(client *whatsmeow.Client, ctx *context.Context) error {
 		if !ctx.Message.Info.IsFromMe {

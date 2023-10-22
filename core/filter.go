@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/celestix/whatsapp-userbot/core/sql"
@@ -65,12 +66,22 @@ func initFilter(l *waLogger.Logger, filter *sql.Filter, dispatcher *ext.Dispatch
 	dispatcher.AddHandlerToGroup(
 		handlers.NewMessage(
 			func(client *whatsmeow.Client, ctx *context.Context) error {
+				if ctx.Message.Info.IsFromMe {
+					return nil
+				}
+				if ctx.Message.Info.IsGroup && !sql.GetChatSettings(ctx.Message.Info.Chat.String()).AllowFilters {
+					return nil
+				}
 				text := ctx.Message.GetText()
-				if !strings.Contains(strings.ToLower(text), filter.Name) {
-					return ext.EndGroups
+				match, _ := regexp.MatchString(
+					fmt.Sprintf(`(\s|^)%s(\s|$)`, filter.Name),
+					strings.ToLower(text),
+				)
+				if !match {
+					return nil
 				}
 				_, _ = ctx.Message.Reply(client, filter.Value)
-				return ext.EndGroups
+				return nil
 			},
 			l.Create("filter-"+filter.Name).ChangeLevel(waLogger.LevelInfo),
 		),
@@ -96,6 +107,29 @@ func listFilters(client *whatsmeow.Client, ctx *context.Context) error {
 	return ext.EndGroups
 }
 
+func allowFilter(client *whatsmeow.Client, ctx *context.Context) error {
+	chatId := ctx.Message.Info.Chat.String()
+	args := ctx.Message.Args()
+	var allowFilters bool
+	var text = "Allowed filters in this chat."
+	if len(args) == 1 {
+		allowFilters = true
+	} else {
+		switch strings.ToLower(args[1]) {
+		case "true", "yes", "on":
+			allowFilters = true
+		case "false", "no", "off":
+			allowFilters = false
+			text = "Disallowed filters in this chat."
+		default:
+			return ext.EndGroups
+		}
+	}
+	sql.ShouldAllowFilters(chatId, allowFilters)
+	ctx.Message.Edit(client, text)
+	return ext.EndGroups
+}
+
 func (*Module) LoadFilter(dispatcher *ext.Dispatcher) {
 	ppLogger := LOGGER.Create("filter")
 	defer ppLogger.Println("Loaded Filter module")
@@ -103,6 +137,11 @@ func (*Module) LoadFilter(dispatcher *ext.Dispatcher) {
 		handlers.NewCommand("filter", authorizedOnly(addFilter(dispatcher, 1)), ppLogger.Create("filter-cmd").
 			ChangeLevel(waLogger.LevelInfo),
 		).AddDescription("Add a filter."),
+	)
+	dispatcher.AddHandler(
+		handlers.NewCommand("allowfilters", authorizedOnly(allowFilter), ppLogger.Create("allowfilters-cmd").
+			ChangeLevel(waLogger.LevelInfo),
+		).AddDescription("Allow filters in a group."),
 	)
 	dispatcher.AddHandler(
 		handlers.NewCommand("remove", authorizedOnly(removeFilter), ppLogger.Create("remove-cmd").

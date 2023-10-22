@@ -20,13 +20,9 @@ func DeleteNote(name string) bool {
 }
 
 func GetNote(name string) *Note {
-	w := &Note{Name: name}
-	if SESSION.First(w).RowsAffected == 0 {
-		return &Note{
-			Name: name,
-		}
-	}
-	return w
+	w := Note{Name: name}
+	SESSION.First(&w)
+	return &w
 }
 
 func GetNotes() []Note {
