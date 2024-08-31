@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"go.mau.fi/whatsmeow"
-	"go.mau.fi/whatsmeow/binary/proto"
+	"go.mau.fi/whatsmeow/proto/waE2E"
 	"go.mau.fi/whatsmeow/types"
 	"go.mau.fi/whatsmeow/types/events"
 )
@@ -43,17 +43,17 @@ func (m *Message) GetText() string {
 }
 
 func (m *Message) Send(client *whatsmeow.Client, to types.JID, text string) (resp whatsmeow.SendResponse, err error) {
-	return client.SendMessage(m.ctx, to, &proto.Message{
+	return client.SendMessage(m.ctx, to, &waE2E.Message{
 		Conversation: &text,
 	})
 }
 
 func (m *Message) Reply(client *whatsmeow.Client, text string) (whatsmeow.SendResponse, error) {
-	return client.SendMessage(m.ctx, m.Info.Chat, &proto.Message{
-		ExtendedTextMessage: &proto.ExtendedTextMessage{
+	return client.SendMessage(m.ctx, m.Info.Chat, &waE2E.Message{
+		ExtendedTextMessage: &waE2E.ExtendedTextMessage{
 			Text: &text,
-			ContextInfo: &proto.ContextInfo{
-				StanzaId:      &m.Info.ID,
+			ContextInfo: &waE2E.ContextInfo{
+				StanzaID:      &m.Info.ID,
 				Participant:   stringPtr(m.Info.Sender.String()),
 				QuotedMessage: m.Message.Message,
 			},
@@ -62,7 +62,7 @@ func (m *Message) Reply(client *whatsmeow.Client, text string) (whatsmeow.SendRe
 }
 
 func (m *Message) Edit(client *whatsmeow.Client, text string) (whatsmeow.SendResponse, error) {
-	return client.SendMessage(m.ctx, m.Info.Chat, client.BuildEdit(m.Info.Chat, m.Info.ID, &proto.Message{
+	return client.SendMessage(m.ctx, m.Info.Chat, client.BuildEdit(m.Info.Chat, m.Info.ID, &waE2E.Message{
 		Conversation: &text,
 	}))
 }

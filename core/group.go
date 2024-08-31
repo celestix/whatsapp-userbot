@@ -66,9 +66,7 @@ func addUser(client *whatsmeow.Client, ctx *context.Context) error {
 		_, _ = ctx.Message.Edit(client, "failed to parse JID: "+err.Error())
 		return ext.EndGroups
 	}
-	_, err = client.UpdateGroupParticipants(jid, map[types.JID]whatsmeow.ParticipantChange{
-		ctx.Message.Info.Chat: whatsmeow.ParticipantChangeAdd,
-	})
+	_, err = client.UpdateGroupParticipants(jid, []types.JID{ctx.Message.Info.Chat}, whatsmeow.ParticipantChangeAdd)
 	if err != nil {
 		_, _ = ctx.Message.Edit(client, "failed to add: "+err.Error())
 		return ext.EndGroups
@@ -95,9 +93,7 @@ func removeUser(client *whatsmeow.Client, ctx *context.Context) error {
 		_, _ = ctx.Message.Edit(client, fmt.Sprintf("failed to get user: %s", err.Error()))
 		return ext.EndGroups
 	}
-	_, err = client.UpdateGroupParticipants(ctx.Message.Info.Chat, map[types.JID]whatsmeow.ParticipantChange{
-		jid: whatsmeow.ParticipantChangeRemove,
-	})
+	_, err = client.UpdateGroupParticipants(jid, []types.JID{ctx.Message.Info.Chat}, whatsmeow.ParticipantChangeRemove)
 	if err != nil {
 		_, _ = ctx.Message.Edit(client, "failed to remove: "+err.Error())
 		return ext.EndGroups
@@ -125,9 +121,7 @@ func promoteUser(client *whatsmeow.Client, ctx *context.Context) error {
 		_, _ = ctx.Message.Edit(client, fmt.Sprintf("failed to get user: %s", err.Error()))
 		return ext.EndGroups
 	}
-	_, err = client.UpdateGroupParticipants(ctx.Message.Info.Chat, map[types.JID]whatsmeow.ParticipantChange{
-		jid: whatsmeow.ParticipantChangePromote,
-	})
+	_, err = client.UpdateGroupParticipants(jid, []types.JID{ctx.Message.Info.Chat}, whatsmeow.ParticipantChangePromote)
 	if err != nil {
 		_, _ = ctx.Message.Edit(client, "failed to promote: "+err.Error())
 		return ext.EndGroups
@@ -155,9 +149,7 @@ func demoteUser(client *whatsmeow.Client, ctx *context.Context) error {
 		_, _ = ctx.Message.Edit(client, fmt.Sprintf("failed to get user: %s", err.Error()))
 		return ext.EndGroups
 	}
-	_, err = client.UpdateGroupParticipants(ctx.Message.Info.Chat, map[types.JID]whatsmeow.ParticipantChange{
-		jid: whatsmeow.ParticipantChangeDemote,
-	})
+	_, err = client.UpdateGroupParticipants(jid, []types.JID{ctx.Message.Info.Chat}, whatsmeow.ParticipantChangePromote)
 	if err != nil {
 		_, _ = ctx.Message.Edit(client, "failed to demote: "+err.Error())
 		return ext.EndGroups
