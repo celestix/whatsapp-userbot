@@ -15,11 +15,17 @@ import (
 func whois(client *whatsmeow.Client, ctx *context.Context) error {
 	msg := ctx.Message.Message
 	if msg.Message.ExtendedTextMessage != nil && msg.Message.ExtendedTextMessage.ContextInfo != nil {
-		jid, err := types.ParseJID(*msg.Message.ExtendedTextMessage.ContextInfo.Participant)
-		if err != nil {
-			fmt.Println(err.Error())
-			_, _ = ctx.Message.Edit(client, fmt.Sprintf("failed to get user: %s", err.Error()))
-			return ext.EndGroups
+		var jid types.JID
+		if msg.Message.ExtendedTextMessage.ContextInfo.Participant != nil {
+			var err error
+			jid, err = types.ParseJID(*msg.Message.ExtendedTextMessage.ContextInfo.Participant)
+			if err != nil {
+				fmt.Println(err.Error())
+				_, _ = ctx.Message.Edit(client, fmt.Sprintf("failed to get user: %s", err.Error()))
+				return ext.EndGroups
+			}
+		} else {
+			jid = msg.Info.MessageSource.Chat
 		}
 		users, err := client.GetUserInfo([]types.JID{jid})
 		if err != nil {
@@ -77,11 +83,17 @@ func whois(client *whatsmeow.Client, ctx *context.Context) error {
 func devices(client *whatsmeow.Client, ctx *context.Context) error {
 	msg := ctx.Message.Message
 	if msg.Message.ExtendedTextMessage != nil && msg.Message.ExtendedTextMessage.ContextInfo != nil {
-		jid, err := types.ParseJID(*msg.Message.ExtendedTextMessage.ContextInfo.Participant)
-		if err != nil {
-			fmt.Println(err.Error())
-			_, _ = ctx.Message.Edit(client, fmt.Sprintf("failed to get user: %s", err.Error()))
-			return ext.EndGroups
+		var jid types.JID
+		if msg.Message.ExtendedTextMessage.ContextInfo.Participant != nil {
+			var err error
+			jid, err = types.ParseJID(*msg.Message.ExtendedTextMessage.ContextInfo.Participant)
+			if err != nil {
+				fmt.Println(err.Error())
+				_, _ = ctx.Message.Edit(client, fmt.Sprintf("failed to get user: %s", err.Error()))
+				return ext.EndGroups
+			}
+		} else {
+			jid = msg.Info.MessageSource.Chat
 		}
 		devices, err := client.GetUserDevices([]types.JID{jid})
 		if err != nil {
